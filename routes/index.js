@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get(`/`, async (req, res) => {
   try {
-    const allPastes = await Paste.find();
+    const allPastes = await Paste.find().populate("pasteFileId");
     res.json({
       message: "All Pastes Found",
       allPastes,
@@ -43,15 +43,15 @@ router.post(`/`, async (req, res) => {
     newPaste.status = req.body.status;
     newPaste.pasteText = req.body.pasteText;
 
-    newfile.name = req.body.title + ".txt";
+    newfile.name = req.body.title + req.body.language;
     newfile.data = Buffer.from(req.body.pasteText);
-    const savedFile = await newfile.save();
-    newPaste.pasteFileId = savedFile._id;
 
     const pasteKey = urlShortener(4);
     newPaste.pasteKey = pasteKey;
 
     const savedPaste = await newPaste.save();
+    const savedFile = await newfile.save();
+    newPaste.pasteFileId = savedFile._id;
     res.json({
       message: "New Paste Been Added",
       data: savedPaste,
@@ -65,7 +65,7 @@ router.get(`/:pasteKey`, cache, async (req, res) => {
   try {
     const onePaste = await Paste.findOne({
       pasteKey: req.params.pasteKey,
-    });
+    }).populate("pasteFileId");
     if (onePaste) {
       await client.setEx(req.params.pasteKey, 3600, JSON.stringify(onePaste));
       res.json({ message: "Paste been found have been found", data: onePaste });
@@ -138,6 +138,8 @@ router.delete(`/`, async (req, res) => {
 router.delete(`/file/all`, async (req, res) => {
   try {
     await File.deleteMany({});
+    await Paste.deleteMany({});
+    await client.del("pasteData");
     res.json({ message: "All File has been deleted" });
   } catch (error) {
     res.send(error);

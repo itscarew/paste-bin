@@ -15,6 +15,7 @@ const PasteSchema = new Schema(
     language: {
       type: String,
       required: [true, "Language is required"],
+      enum: [".html", ".js", ".css", ".txt", ".php"],
     },
     status: {
       type: String,
