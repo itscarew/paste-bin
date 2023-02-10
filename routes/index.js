@@ -49,9 +49,9 @@ router.post(`/`, async (req, res) => {
     const pasteKey = urlShortener(4);
     newPaste.pasteKey = pasteKey;
 
-    const savedPaste = await newPaste.save();
     const savedFile = await newfile.save();
     newPaste.pasteFileId = savedFile._id;
+    const savedPaste = await newPaste.save();
     res.json({
       message: "New Paste Been Added",
       data: savedPaste,
@@ -128,6 +128,7 @@ router.delete(`/:pasteKey`, async (req, res) => {
 router.delete(`/`, async (req, res) => {
   try {
     await Paste.deleteMany({});
+    await File.deleteMany({});
     await client.del("pasteData");
     res.json({ message: "All Paste has been deleted" });
   } catch (error) {
