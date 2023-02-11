@@ -52,11 +52,11 @@ const PasteSchema = new Schema(
 
 PasteSchema.post("save", async function (doc, next) {
   if (this.status === "1 hour") {
-    deletePaste(this.pasteKey, this.pasteFileId, 10000);
+    deletePaste(this.pasteKey, this.pasteFileId, 3600000);
   } else if (this.status === "1 day") {
-    deletePaste(this.pasteKey, this.pasteFileId, 15000);
+    deletePaste(this.pasteKey, this.pasteFileId, 86400000);
   } else if (this.status === "1 week") {
-    deletePaste(this.pasteKey, this.pasteFileId, 20000);
+    deletePaste(this.pasteKey, this.pasteFileId, 604800000);
   } else {
     next();
   }
