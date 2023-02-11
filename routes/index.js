@@ -1,7 +1,6 @@
 import express from "express";
 import { cache, urlShortener } from "../utils/urlShortner.js";
 import { client } from "../index.js";
-import cron from "node-cron";
 import Paste from "../schema/paste.schema.js";
 import File from "../schema/file.schema.js";
 import fs from "fs";
@@ -52,6 +51,7 @@ router.post(`/`, async (req, res) => {
     const savedFile = await newfile.save();
     newPaste.pasteFileId = savedFile._id;
     const savedPaste = await newPaste.save();
+
     res.json({
       message: "New Paste Been Added",
       data: savedPaste,
@@ -155,10 +155,5 @@ router.post(`/file/download/:fileId`, async (req, res) => {
     res.status(500).send(error);
   }
 });
-
-// //cron job every month
-// cron.schedule("0 10 1 * *", () => {
-//   addShortUrls();
-// });
 
 export default router;

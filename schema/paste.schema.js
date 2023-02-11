@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { deletePaste } from "../utils/deletePaste.js";
 
 const Schema = mongoose.Schema;
 
@@ -48,5 +49,17 @@ const PasteSchema = new Schema(
   },
   { timestamps: true }
 );
+
+PasteSchema.post("save", async function (doc, next) {
+  if (this.status === "1 hour") {
+    deletePaste(this.pasteKey, this.pasteFileId, 10000);
+  } else if (this.status === "1 day") {
+    deletePaste(this.pasteKey, this.pasteFileId, 15000);
+  } else if (this.status === "1 week") {
+    deletePaste(this.pasteKey, this.pasteFileId, 20000);
+  } else {
+    next();
+  }
+});
 
 export default mongoose.model(`Paste`, PasteSchema);
