@@ -9,6 +9,5 @@ export const deletePaste = async (pasteKey, pasteFileId, time) => {
     });
     await client.del(pasteKey);
     await File.deleteOne({ _id: pasteFileId });
-    console.log(pasteKey, pasteFileId, time, "deleted successfully");
   }, time);
 };
