@@ -16,7 +16,7 @@ router.get(`/`, async (req, res) => {
       allPastes,
     });
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
   }
 });
 
@@ -28,7 +28,7 @@ router.get(`/file/all`, async (req, res) => {
       allFiles,
     });
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
   }
 });
 
@@ -57,7 +57,7 @@ router.post(`/`, async (req, res) => {
       data: savedPaste,
     });
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
   }
 });
 
@@ -66,16 +66,68 @@ router.get(`/:pasteKey`, cache, async (req, res) => {
     const onePaste = await Paste.findOne({
       pasteKey: req.params.pasteKey,
     }).populate("pasteFileId");
+
     if (onePaste) {
       await client.setEx(req.params.pasteKey, 3600, JSON.stringify(onePaste));
       res.json({ message: "Paste been found have been found", data: onePaste });
+
+      if (onePaste.status === "burn on reading") {
+        await Paste.deleteOne({
+          pasteKey: req.params.pasteKey,
+        });
+        await client.del(req.params.pasteKey);
+        await File.deleteOne({ _id: onePaste.pasteFileId });
+      }
     } else {
       res
         .status(404)
         .json({ message: `Paste ${req.params.pasteKey} doesn't exist` });
     }
   } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
+  }
+});
+
+router.delete(`/:pasteKey`, async (req, res) => {
+  try {
+    const onePaste = await Paste.findOne({
+      pasteKey: req.params.pasteKey,
+    });
+    if (onePaste) {
+      await Paste.deleteOne({
+        pasteKey: req.params.pasteKey,
+      });
+      await client.del(req.params.pasteKey);
+      res.json({ message: `Paste ${req.params.pasteKey} has been deleted` });
+    } else {
+      res
+        .status(400)
+        .json({ message: `Paste ${req.params.pasteKey} doesn't exist` });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.delete(`/`, async (req, res) => {
+  try {
+    await Paste.deleteMany({});
+    await File.deleteMany({});
+    await client.del("pasteData");
+    res.json({ message: "All Paste has been deleted" });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.delete(`/file/all`, async (req, res) => {
+  try {
+    await File.deleteMany({});
+    await Paste.deleteMany({});
+    await client.del("pasteData");
+    res.json({ message: "All File has been deleted" });
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
@@ -100,50 +152,7 @@ router.post(`/file/download/:fileId`, async (req, res) => {
         .json({ message: `File ${req.params.pasteKey} doesn't exist` });
     }
   } catch (error) {
-    res.send(error);
-  }
-});
-
-router.delete(`/:pasteKey`, async (req, res) => {
-  try {
-    const onePaste = await Paste.findOne({
-      pasteKey: req.params.pasteKey,
-    });
-    if (onePaste) {
-      await Paste.deleteOne({
-        pasteKey: req.params.pasteKey,
-      });
-      await client.del(req.params.pasteKey);
-      res.json({ message: `Paste ${req.params.pasteKey} has been deleted` });
-    } else {
-      res
-        .status(400)
-        .json({ message: `Paste ${req.params.pasteKey} doesn't exist` });
-    }
-  } catch (error) {
-    res.send(error);
-  }
-});
-
-router.delete(`/`, async (req, res) => {
-  try {
-    await Paste.deleteMany({});
-    await File.deleteMany({});
-    await client.del("pasteData");
-    res.json({ message: "All Paste has been deleted" });
-  } catch (error) {
-    res.send(error);
-  }
-});
-
-router.delete(`/file/all`, async (req, res) => {
-  try {
-    await File.deleteMany({});
-    await Paste.deleteMany({});
-    await client.del("pasteData");
-    res.json({ message: "All File has been deleted" });
-  } catch (error) {
-    res.send(error);
+    res.status(500).send(error);
   }
 });
 
