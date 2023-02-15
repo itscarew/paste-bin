@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "HOST=0.0.0.0 nodemon index.js"
   },
   "dependencies": {
     "body-parser": "^1.20.1",
