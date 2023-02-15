@@ -33,6 +33,10 @@ export const client = redis.createClient(redisPort);
 client.connect();
 client.on("connected", () => console.log("Redis connected"));
 
+client.on("error", (error) => {
+  console.error(error);
+});
+
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
