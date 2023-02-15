@@ -8,9 +8,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const port = process.env.PORT || 5000;
-const redisPort =
-  `redis://default:${process.env.REDISPASSWORD}@containers-us-west-44.railway.app:7090` ||
-  6379;
+const redisPort = `rediss://red-cfmghita499591en43v0:obkoHSGD7crgPkN0v865uOJc5UST3xZP@oregon-redis.render.com:6379`;
 
 const app = express();
 const db = `mongodb+srv://itscarew:${process.env.DB_PASSWORD}@paste-bin-cluster.kd40cmy.mongodb.net/?retryWrites=true&w=majority`;
