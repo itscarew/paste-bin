@@ -8,10 +8,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const port = process.env.PORT || 5000;
-const redisPort = `rediss://${process.env.REDISPASSWORD}@oregon-redis.render.com:6379`;
+const redisUrl = process.env.REDISPASSWORD;
 
 const app = express();
-const db = `mongodb+srv://itscarew:${process.env.DB_PASSWORD}@paste-bin-cluster.kd40cmy.mongodb.net/?retryWrites=true&w=majority`;
+const db = process.env.DB_PASSWORD;
 mongoose.connect(db, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -26,7 +26,7 @@ app.use(
 );
 app.use("/pasteBin", pasteRoutes);
 
-export const client = redis.createClient(redisPort);
+export const client = redis.createClient({ url: redisUrl });
 
 client.connect();
 client.on("connected", () => console.log("Redis connected"));
